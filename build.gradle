@@ -1,15 +1,10 @@
-import me.smash.CreateReleaseVersion
 
 buildscript {
     repositories {
         jcenter()
-        maven {
-            url "https://dl.bintray.com/aureamohammadalavi/smash-repo"
-        }
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
-        classpath "me.smash.gradle:gradle-task-demo:1.0.0"
     }
 }
 
@@ -31,18 +26,17 @@ dependencies {
 }
 
 
-task release(type: CreateReleaseVersion) {
-    release = true
-    destFile = file("$rootDir/version.properties")
-}
-
 
 group = "me.smash.gradle"
-version = "1.0.2"
+version = new ProjectVersion(1, 0, System.env.BUILD_NUMBER)
 
 task sourceJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
     archiveClassifier = "sources"
+}
+
+artifacts {
+    archives sourceJar
 }
 
 sourceCompatibility = "1.8"
@@ -77,6 +71,28 @@ publishing {
                     }
                 }
             }
+        }
+    }
+}
+
+class ProjectVersion {
+    int major
+    int minor
+    String build
+
+    ProjectVersion(int major, int minor, String build) {
+        this.major = major
+        this.minor = minor
+        this.build = build
+    }
+
+
+    @Override
+    String toString() {
+        if (build == null) {
+            return "$major.$minor"
+        } else {
+            return "$major.$minor.$build"
         }
     }
 }
