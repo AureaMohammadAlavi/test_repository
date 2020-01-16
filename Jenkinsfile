@@ -17,7 +17,7 @@ pipeline {
                BINTRAY_API_KEY=credentials('BINTRAY_API_KEY')
             }
             steps {
-                gradlew('bintrayUpload')
+                gradlew('publishMyPublicationPublicationToBintaryRepository')
             }
         }
     }

@@ -1,4 +1,3 @@
-
 buildscript {
     repositories {
         jcenter()
@@ -11,6 +10,8 @@ buildscript {
 apply plugin: 'com.jfrog.bintray'
 apply plugin: "java"
 apply plugin: "maven-publish"
+apply plugin: "distribution"
+apply plugin: "signing"
 
 
 sourceCompatibility = 1.8
@@ -24,7 +25,6 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation 'commons-io:commons-io:2.6'
 }
-
 
 
 group = "me.smash.gradle"
@@ -61,6 +61,7 @@ publishing {
         MyPublication(MavenPublication) {
             from components.java
             artifact sourceJar
+            artifact distZip
             pom {
                 description = "a simple library to test drive artifact publishing"
                 developers {
@@ -70,6 +71,22 @@ publishing {
                         email = "m.alavi1986@gmail.com"
                     }
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "smash"
+            url = "$rootDir/../smash-repo"
+        }
+
+        maven {
+            name = "bintary"
+            url = "https://api.bintray.com/maven/aureamohammadalavi/smash-repo/my-first-package/;publish=1"
+
+            credentials {
+                username = "aureamohammadalavi"
+                password = System.getenv("BINTRAY_API_KEY")
             }
         }
     }
@@ -96,3 +113,41 @@ class ProjectVersion {
         }
     }
 }
+
+jar {
+    doFirst {
+        Properties properties = new Properties()
+        properties.version = project.version.toString()
+        def file = file("$buildDir/resources/main/version.properties")
+        file.parentFile.mkdirs()
+        file.withOutputStream {
+            properties.store(it, null)
+        }
+    }
+}
+
+
+distributions {
+    main {
+        contents {
+            from {
+                libsDir
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.MyPublication
+}
+
+task runJar(type:JavaExec) {
+    classpath = sourceSets.main.compileClasspath + jar.outputs.files
+    main = "me.smash.gradle.Sample"
+    println classpath
+}
+
+gradle.taskGraph.whenReady {
+    ext."signing.password" = System.getenv("SIGNING_PASSWORD")
+}
+distZip.dependsOn jar, sourceJar
