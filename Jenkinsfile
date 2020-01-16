@@ -15,6 +15,7 @@ pipeline {
         stage('Publish to Bintray') {
             environment {
                BINTRAY_API_KEY=credentials('BINTRAY_API_KEY')
+               GPG_SIGNING_PASSWORD=credentials('GPG_SIGNING_PASSWORD')
             }
             steps {
                 gradlew('publishMyPublicationPublicationToBintaryRepository')

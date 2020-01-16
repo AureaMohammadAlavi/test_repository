@@ -148,6 +148,6 @@ task runJar(type:JavaExec) {
 }
 
 gradle.taskGraph.whenReady {
-    ext."signing.password" = System.getenv("SIGNING_PASSWORD")
+    ext."signing.password" = System.getenv("GPG_SIGNING_PASSWORD")
 }
 distZip.dependsOn jar, sourceJar
